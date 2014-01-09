@@ -2,44 +2,64 @@
 # -*- coding: utf-8 -*- 
 import sys
 
-class LiarDiceGame:
 
-  def readCommand():
-    # Sprint "arg:", sys.argv
+notOne = False
+isOne  = True
+
+class LiarDiceGame:
+  
+
+  def  __init__(self):
+    self.playerYellHistory = {} # 
+    self.allRealDiceStatus = [] # ex. [(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]
+    self.playerDiceStatus  = {} # ex. {1:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)],2:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]}
+    self.lastPlayer        = None
+    self.catchPlayer       = None
+    self.prevYell          = None # add func to record
+
+  def buildYellNOneTuple(self, yellTuple):
+    return yellTuple + (isOne,) if yellTuple[1] == 1 else yellTuple + (notOne,)
+
+  def readCommand(self):
     argList = sys.argv
     if len( argList ) >= 1:
-      playerNumber = argList[ argList.index('-p') + 1 ] if '-p' in argList else 3 #-p: player
-      diceNumber   = argList[ argList.index('-d') + 1 ] if '-d' in argList else 5 #-d: dice 
+      playerNumber = int( argList[ argList.index('-p') + 1 ] ) if '-p' in argList else 3 #-p: player
+      diceNumber   = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5 #-d: dice 
+    return [ playerNumber, diceNumber ] 
+  
+  def recordPlayerYell(self, playerOrder, yellNOneTuple):
+    if self.playerYellHistory.has_key( playerOrder ):
+      self.playerYellHistory[ playerOrder ].append( yellNOneTuple )
+    else:
+      self.playerYellHistory[ playerOrder ] = [ yellNOneTuple ]
 
-    return [ int(playerNumber), int(diceNumber) ] 
+  def recordCatchNLastPlayer(self, playerOrder):
+    self.lastPlayer  = playerOrder - 1 if playerOrder != 1 else playerNumber
+    self.catchPlayer = playerOrder
 
-  def main():  
-    playerNumber, diceNumber = readCommand()
+  def start(self):  
+    playerNumber, diceNumber = self.readCommand()
     print "playerNumber:", playerNumber, "diceNumber:", diceNumber
-    playerTurnCount = 1
+    playerOrder = 1
     while True:
-      print "Turn for player", playerTurnCount
-      diceTuple, Catch = input("how many dice? & 有沒有1？ ")
-      print diceTuple, Catch
-      
+      print "Order of player", playerOrder
+      yellTuple, Catch = input("how many dice? 要不要抓 ")
+      yellNOneTuple = self.buildYellNOneTuple( yellTuple )
+      print yellNOneTuple, Catch
+      self.recordPlayerYell(playerOrder, yellNOneTuple)
+
       if Catch:
+        self.recordCatchNLastPlayer( playerOrder )
         print "Game Over, start showing result"
+        print "catchPlayer:", self.catchPlayer
+        print "lastPlayer:", self.lastPlayer
+        print "playerYellHistory:", self.playerYellHistory
         break
       else:
-        if playerTurnCount < playerNumber:
-          # prisnt "playerTurnCount:", playerTurnCount, "playerNumber", playerNumber
-          playerTurnCount += 1
+        if playerOrder < playerNumber:
+          playerOrder += 1
         else:
-          playerTurnCount = 1
-
-def readCommand():
-  # Sprint "arg:", sys.argv
-  argList = sys.argv
-  if len( argList ) >= 1:
-    playerNumber = argList[ argList.index('-p') + 1 ] if '-p' in argList else 3 #-p: player
-    diceNumber   = argList[ argList.index('-d') + 1 ] if '-d' in argList else 5 #-d: dice 
-
-  return [ int(playerNumber), int(diceNumber) ]
+          playerOrder = 1
 
 if __name__ == '__main__':
-  main()
+  LiarDiceGame().start()
