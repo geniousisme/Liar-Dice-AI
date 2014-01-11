@@ -1,7 +1,9 @@
 #encoding:utf-8
 # -*- coding: utf-8 -*- 
 import sys
-
+import dice
+from prob import ProbAgent
+# from game import gameLoop
 
 notOne = False
 isOne  = True
@@ -10,9 +12,9 @@ class LiarDiceGame:
   
 
   def  __init__(self):
-    self.playerYellHistory = {} # 
-    self.allRealDiceStatus = [] # ex. [(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]
-    self.playerDiceStatus  = {} # ex. {1:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)],2:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]}
+    self.playerYellHistory       = {} # 
+    self.allRealDiceStatus       = [] # ex. [(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]
+    self.playerToDiceStatusDict  = {} # ex. {1:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)],2:[(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]}
     self.lastPlayer        = None
     self.catchPlayer       = None
     self.prevYell          = None # add func to record
@@ -33,13 +35,16 @@ class LiarDiceGame:
     else:
       self.playerYellHistory[ playerOrder ] = [ yellNOneTuple ]
 
-  def recordCatchNLastPlayer(self, playerOrder):
+  def recordCatchNLastPlayer(self, playerOrder, playerNumber):
     self.lastPlayer  = playerOrder - 1 if playerOrder != 1 else playerNumber
     self.catchPlayer = playerOrder
 
-  def start(self):  
+  def run(self):  
     playerNumber, diceNumber = self.readCommand()
     print "playerNumber:", playerNumber, "diceNumber:", diceNumber
+    self.playerToDiceStatusDict = dice.generate( self.playerToDiceStatusDict, playerNumber, diceNumber )
+    self.allRealDiceStatus      = dice.allReallDiceStatusCount( self.playerToDiceStatusDict.values() )
+    print "all dice status:", self.allRealDiceStatus
     playerOrder = 1
     while True:
       print "Order of player", playerOrder
@@ -47,9 +52,8 @@ class LiarDiceGame:
       yellNOneTuple = self.buildYellNOneTuple( yellTuple )
       print yellNOneTuple, Catch
       self.recordPlayerYell(playerOrder, yellNOneTuple)
-
       if Catch:
-        self.recordCatchNLastPlayer( playerOrder )
+        self.recordCatchNLastPlayer( playerOrder, playerNumber )
         print "Game Over, start showing result"
         print "catchPlayer:", self.catchPlayer
         print "lastPlayer:", self.lastPlayer
@@ -62,4 +66,4 @@ class LiarDiceGame:
           playerOrder = 1
 
 if __name__ == '__main__':
-  LiarDiceGame().start()
+  LiarDiceGame().run()
