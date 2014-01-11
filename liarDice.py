@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*- 
 import sys
 import dice
-from prob import ProbAgent
-# from game import gameLoop
+# from prob import ProbAgent
+from newProb import ProbAgent
 
 notOne = False
 isOne  = True
+firstPlayerOrder = 1
 
 class LiarDiceGame:
   
@@ -36,19 +37,14 @@ class LiarDiceGame:
       self.playerYellHistory[ playerOrder ] = [ yellNOneTuple ]
 
   def recordCatchNLastPlayer(self, playerOrder, playerNumber):
-    self.lastPlayer  = playerOrder - 1 if playerOrder != 1 else playerNumber
+    self.lastPlayer  = playerOrder - 1 if playerOrder != firstPlayerOrder else playerNumber
     self.catchPlayer = playerOrder
 
-  def run(self):  
-    playerNumber, diceNumber = self.readCommand()
-    print "playerNumber:", playerNumber, "diceNumber:", diceNumber
-    self.playerToDiceStatusDict = dice.generate( self.playerToDiceStatusDict, playerNumber, diceNumber )
-    self.allRealDiceStatus      = dice.allReallDiceStatusCount( self.playerToDiceStatusDict.values() )
-    print "all dice status:", self.allRealDiceStatus
-    playerOrder = 1
+  def gameLoop(self, playerNumber):
+    playerOrder = firstPlayerOrder
     while True:
       print "Order of player", playerOrder
-      yellTuple, Catch = input("how many dice? 要不要抓 ")
+      yellTuple, Catch = input("how many dice? 要不要抓?")
       yellNOneTuple = self.buildYellNOneTuple( yellTuple )
       print yellNOneTuple, Catch
       self.recordPlayerYell(playerOrder, yellNOneTuple)
@@ -61,9 +57,18 @@ class LiarDiceGame:
         break
       else:
         if playerOrder < playerNumber:
-          playerOrder += 1
+          playerOrder += 1 # go to next playerOrder
         else:
-          playerOrder = 1
+          playerOrder = firstPlayerOrder
+
+  def run(self):  
+    playerNumber, diceNumber = self.readCommand()
+    print "playerNumber:", playerNumber, "diceNumber:", diceNumber
+    self.playerToDiceStatusDict = dice.generate( self.playerToDiceStatusDict, playerNumber, diceNumber )
+    self.allRealDiceStatus      = dice.allReallDiceStatusCount( self.playerToDiceStatusDict.values() )
+    print "all dice status:", self.allRealDiceStatus
+    self.gameLoop( playerNumber )
+
 
 if __name__ == '__main__':
   LiarDiceGame().run()
