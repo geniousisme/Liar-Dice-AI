@@ -15,8 +15,8 @@ def generate(playerToDiceStatusDict, playerNumber, diceNumber):
       elif sum( diceStatusCount ) == diceNumber:
         diceStatusCount.append( 0 )
     playerToDiceStatusDict[ playerOrder ] = diceStatusCount
-  print "playerToDiceStatusDict:", playerToDiceStatusDict
-  print playerToDiceStatusDict.values()
+  # print "playerToDiceStatusDict:", playerToDiceStatusDict
+  # print playerToDiceStatusDict.values()
   return playerToDiceStatusDict
 
 def allReallDiceStatusCount(diceStatusCountArrayList):
