@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*- 
 import sys
 import dice
+import params
 # from prob import ProbAgent
 from newProb  import ProbAgent
 from training import UpdateStatusClass
+
 import time
 # import game
 notOne = False
@@ -24,7 +26,7 @@ class LiarDiceGame:
     self.prevYell                = None # add func to record
     self.playerWinStatistics     = {}
     self.playerLoseStatistics    = {}
-    self.credibility_list        = {1:1,2:0.1,3:0.1}
+    self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
     return (yellTuple, oneAppear)
@@ -35,7 +37,8 @@ class LiarDiceGame:
       playerNumber   = int( argList[ argList.index('-p') + 1 ] ) if '-p' in argList else 3  #-p: player
       diceNumber     = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5  #-d: dice 
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1 #-t: training
-    return [ playerNumber, diceNumber, trainingNumber ] 
+      isLearning     = True if '-l' in argList else False
+    return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
   
   def recordPlayerYell(self, playerOrder, yellNOneTuple):
     if self.playerYellHistory.has_key( playerOrder ):
@@ -100,7 +103,7 @@ class LiarDiceGame:
     else:
       self.playerLoseStatistics[ losePlayer ] = 1
     
-  def gameLoop(self, playerNumber, diceNumber, trainingNumber, playerToDiceStatusDict, allRealDiceStatus):
+  def gameLoop(self, playerNumber, diceNumber, trainingNumber, isLearning, playerToDiceStatusDict, allRealDiceStatus):
     playerOrder = firstPlayerOrder
     hostile_player_num = playerNumber - 1
     dice_amount_per_player = diceNumber
@@ -108,19 +111,16 @@ class LiarDiceGame:
     risk_rate = 0
     yell_threshold = 0.5
     catch_threshold = 0.2
-    
-    # A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, 0.05, 0.2, 0.0, credibility_list )
-    # B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, 0.1,  0.2, 0.0, credibility_list )
-    # C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, 0.15, 0.2, 0.2, credibility_list )
-    # playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
-    # print "playerOrderToAgentDict", playerOrderToAgentDict
     playerOrder = roundNumber = 1
     oneAppear = False
     prevYell = None
+    ARiskRate, ACatchThreshold, AYellOneProb = params.agentParamsOf('A')
+    BRiskRate, BCatchThreshold, BYellOneProb = params.agentParamsOf('B')
+    CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
     while True:
-      A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, 0.15, 0.2, 0.0, self.credibility_list )
-      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, 0.05,  0.2, 0.0, self.credibility_list )
-      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, 0.1, 0.2, 0.0, self.credibility_list )
+      A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
+      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, self.playerToCredibilityDict )
+      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, self.playerToCredibilityDict )
       playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
       if not self.isTraining( trainingNumber ):
         print "########## Order of player", playerOrder #"Agent:", playerOrderToAgentDict[ playerOrder ]
@@ -156,6 +156,11 @@ class LiarDiceGame:
           print "playerYellHistory:", self.playerYellHistory
           print "prevYell", prevYell
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
+        if isLearning:
+          learning = UpdateStatusClass( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          newCredibilityList = learning.calcDistanceFromHistoryList()
+          self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
+        if self.isTraining( trainingNumber ): print "playerToCredibilityDict:", self.playerToCredibilityDict
         break
       else:
         if playerOrder < playerNumber:
@@ -165,7 +170,7 @@ class LiarDiceGame:
       roundNumber += 1
 
   def run(self):  
-    playerNumber, diceNumber, trainingNumber = self.readCommand()
+    playerNumber, diceNumber, trainingNumber, isLearning = self.readCommand()
     for training in xrange( 1, trainingNumber + 1 ):
       if not self.isTraining( trainingNumber ):  
         print "playerNumber:", playerNumber, "diceNumber:", diceNumber
@@ -174,7 +179,7 @@ class LiarDiceGame:
       self.playerToDiceStatusDict = dice.generate( self.playerToDiceStatusDict, playerNumber, diceNumber )
       self.allRealDiceStatus      = dice.allReallDiceStatusCount( self.playerToDiceStatusDict.values() )
       if not self.isTraining( trainingNumber ):  print "all dice status:", self.allRealDiceStatus
-      self.gameLoop( playerNumber, diceNumber, trainingNumber, self.playerToDiceStatusDict, self.allRealDiceStatus )
+      self.gameLoop( playerNumber, diceNumber, trainingNumber, isLearning, self.playerToDiceStatusDict, self.allRealDiceStatus )
     if self.isTraining( trainingNumber ): 
       print "playerWinStatistics:", self.playerWinStatistics
       for player, winNumber in self.playerWinStatistics.items():

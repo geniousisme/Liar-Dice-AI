@@ -132,6 +132,7 @@ class ProbAgent():
       
       if index == select_number:
         yell_card = letter
+        break
       index += 1.0
 
     return yell_card
