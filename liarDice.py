@@ -39,6 +39,7 @@ class LiarDiceGame:
     self.playerCatchLoseStatistics     = {}
     self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
     self.isQuite                 = False
+    self.updateAgentList         = 'all'
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
     return (yellTuple, oneAppear)
@@ -50,9 +51,13 @@ class LiarDiceGame:
       diceNumber     = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5  #-d: dice 
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1  #-t: training
       isLearning     = True if '-l' in argList else False
-      if isLearning: self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
+      
+      if isLearning: 
+        self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
+        self.updateAgent = argList[ argList.index('-a') + 1 ] if '-a' in argList else 'all'
+
       self.isQuite   = True if '-q' in argList else False
-      # learningSwitch = 
+      
     return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
   
   def recordPlayerYell(self, playerOrder, yellNOneTuple):
@@ -210,8 +215,15 @@ class LiarDiceGame:
           # elif self.learningSwitch == UpdateStatusOO:
           #   learning = UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           newCredibilityList = learning.calcDistanceFromHistoryList()
-          self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
-          print "playerToCredibilityDict:", self.playerToCredibilityDict
+          if self.updateAgent == 'all':
+            self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
+          elif self.updateAgent == 'A':
+            self.playerToCredibilityDict[1] = newCredibilityList[0]
+          elif self.updateAgent == 'B':
+            self.playerToCredibilityDict[2] = newCredibilityList[1]
+          elif self.updateAgent == 'C':
+            self.playerToCredibilityDict[3] = newCredibilityList[2]
+          if not self.isQuite:  print "playerToCredibilityDict:", self.playerToCredibilityDict
         break
       else:
         if playerOrder < playerNumber:
