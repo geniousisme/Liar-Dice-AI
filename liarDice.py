@@ -67,9 +67,10 @@ class LiarDiceGame:
   def commonRule(self, prevYell, allRealDiceStatus):
     return True if self.diceDotNumber( prevYell ) > self.diceDotNumber( allRealDiceStatus[ self.diceDot( prevYell ) - 1 ] ) else False
 
-  def gameResult(self):
-    print "gameResult"
-
+  # def gameResult(self):
+  #   print "gameResult"
+  #   return ( self.catchPlayerWin( catchPlayer, self.isTraining( trainingNumber ) ) if self.oneAppearRule( prevYell, allRealDiceStatus ) else ( self.catchPlayerWin( catchPlayer, self.isTraining( trainingNumber ) ) if self.commonRule( prevYell, allRealDiceStatus ) else self.lastPlayerWin( lastPlayer, self.isTraining( trainingNumber ) ) )
+  
   def gameJudge(self, prevYell, allRealDiceStatus, oneAppear, catchPlayer, lastPlayer, trainingNumber):
     if not self.isTraining( trainingNumber ):
       print "oneAppear?", oneAppear
