@@ -132,6 +132,7 @@ class ProbAgent():
       
       if index == select_number:
         yell_card = letter
+        break
       index += 1.0
 
     return yell_card
@@ -190,7 +191,7 @@ class ProbAgent():
     
     if flag_switch_one:
       self.set_flag_one(True)
-      self.prob_dict = self.construct_prob_dict()
+      self.construct_prob_dict()
 
     if self.flag_one or (yell[1] == 1):
       needed = yell[0] - self.my_dice_status[yell[1]]

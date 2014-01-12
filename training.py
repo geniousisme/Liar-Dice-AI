@@ -47,9 +47,6 @@ class UpdateStatusClass():
       total_distance = self.calcDistanceFromHistory(history_list)
       total_distances.append(total_distance)
     
-
-    
-    
     sum_distance = sum(total_distances)
     average_distance = sum_distance/len(total_distances)
     max_distance = max(total_distances)
@@ -68,15 +65,78 @@ class UpdateStatusClass():
     return self.credibility_list
     #print max_distance
 
-  
-result = [(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]
-A_history = {1:[((1,2),False),((3,2),True)],2:[((2,2),False),((3,4),True)],3:[((3,1),True)]}
+class UpdateStatusChuan():
 
-#old credibility_list
-credibility_list = [0.34,0.2,0.5]
-print credibility_list
-#construct a class
-learning = UpdateStatusClass(result,A_history,credibility_list,0.8)
-#calculate new credibility_list
-new_credibility_list = learning.calcDistanceFromHistoryList()
-print new_credibility_list
+  def __init__(self, result, history_lists, credibility_list, learning_rate):
+    self.result = result
+    self.history_lists = history_lists
+    self.credibility_list = credibility_list
+    self.learning_rate = learning_rate
+
+  def calcErrorDistance(self, yell_value, flag_one):
+    distance = 0
+    dice_amount,dice_point = yell_value
+    
+    if flag_one == False and dice_point != 1:
+      one_amount = self.result[0][0]
+
+      for result_element in self.result:
+        result_dice_amount,result_dice_point = result_element
+        if result_dice_point == dice_point:
+
+          distance = max(0, dice_amount - (result_dice_amount + one_amount))
+      
+    else:    
+      for result_element in self.result:
+        result_dice_amount,result_dice_point = result_element
+        if result_dice_point == dice_point:
+          distance = max(0, dice_amount - result_dice_amount)
+     
+    return distance
+
+
+  def calcDistanceFromHistory(self,history_list):
+    total_distance = 0
+    total_number = 0
+    for history in history_list: 
+      yell_value,flag_one = history
+      
+      distance = self.calcErrorDistance(yell_value,flag_one)
+      total_distance += distance
+      total_number += 1
+    average_distance = float(total_distance)/float(total_number)
+    return average_distance
+
+  def calcDistanceFromHistoryList(self):
+    
+    total_distances = []
+    min_credibility = 0.01
+
+    for key,history_list in self.history_lists.items():
+      total_distance = self.calcDistanceFromHistory(history_list)
+      
+      total_distances.append(total_distance)
+
+    # print total_distances
+    for index in range(len(self.credibility_list)):
+      
+      new_value = self.credibility_list[index] - (total_distances[index]* self.learning_rate)
+      
+      if new_value > min_credibility and new_value < 1:
+        self.credibility_list[index] = new_value
+    
+    #print total_distances
+    return self.credibility_list
+    #print max_distance
+  
+# result = [(2,1),(3,2),(1,3),(1,4),(1,5),(1,6)]
+# A_history = {1:[((1,2),False),((3,2),True)],2:[((2,2),False),((3,4),True)],3:[((3,1),True)]}
+
+# #old credibility_list
+# credibility_list = [0.34,0.2,0.5]
+# print credibility_list
+# #construct a class
+# learning = UpdateStatusClass(result,A_history,credibility_list,0.8)
+# #calculate new credibility_list
+# new_credibility_list = learning.calcDistanceFromHistoryList()
+# print new_credibility_list
