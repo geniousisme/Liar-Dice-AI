@@ -12,6 +12,9 @@ import time
 notOne = False
 isOne  = True
 firstPlayerOrder = 1
+UpdateStatusTang = 1
+UpdateStatusChuan = 2
+defaultDict = {1:0, 2:0, 3:0}
 
 def dictSubstract(dict1, dict2):
   return { key: dict1[key] - dict2.get(key, 0) for key in dict1.keys() }
@@ -30,8 +33,8 @@ class LiarDiceGame:
     self.lastPlayer              = None
     self.catchPlayer             = None
     self.prevYell                = None # add func to record
-    self.playerWinStatistics     = {}
-    self.playerLoseStatistics    = {}
+    self.playerWinStatistics     = defaultDict
+    self.playerLoseStatistics    = defaultDict
     self.playerCatchWinStatistics      = {}
     self.playerCatchLoseStatistics     = {}
     self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
@@ -47,6 +50,7 @@ class LiarDiceGame:
       diceNumber     = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5  #-d: dice 
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1  #-t: training
       isLearning     = True if '-l' in argList else False
+           # = True if '-l' in argList else False
       self.isQuite   = True if '-q' in argList else False
       # learningSwitch = 
     return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
@@ -90,8 +94,6 @@ class LiarDiceGame:
       self.playerCatchLoseStatistics[ catchLosePlayer ] += 1
     else:
       self.playerCatchLoseStatistics[ catchLosePlayer ] = 1
-
-
 
   def catchPlayerWin(self, catchPlayer, lastPlayer, isTraining):
     if not isTraining:  print "Successfully Catch!! Player", catchPlayer, "win this game!!"
@@ -213,7 +215,7 @@ class LiarDiceGame:
           playerOrder = firstPlayerOrder
       roundNumber += 1
 
-  def showStatisticsResult(self, playerStatistics, playerStatisticsType):
+  def showStatisticsResult(self, playerStatistics, denominator, playerStatisticsType):
     print playerStatisticsType, playerStatistics   
 
   def run(self):  
@@ -240,12 +242,18 @@ class LiarDiceGame:
       print "playerCatchWinStatistics:", self.playerCatchWinStatistics
       for player, winNumber in self.playerCatchWinStatistics.items():
         print "player:", player,",",winNumber,"/",trainingNumber," = ", float( winNumber )/ trainingNumber * 100,"%"
-        print "player:", player,",",winNumber,"/", playerCatchStatistics[ player ]," = ", float( winNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        if playerCatchStatistics[ player ] != 0:
+          print "player:", player,",",winNumber,"/", playerCatchStatistics[ player ]," = ", float( winNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "catch 0 times."
 
       print "playerCatchLoseStatistics:", self.playerCatchLoseStatistics
       for player, loseNumber in self.playerCatchLoseStatistics.items():
         print "player:", player,",",loseNumber,"/",trainingNumber," = ", float( loseNumber )/ trainingNumber * 100,"%"
-        print "player:", player,",",loseNumber,"/",playerCatchStatistics[ player ]," = ", float( loseNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        if playerCatchStatistics[ player ] != 0:
+          print "player:", player,",",loseNumber,"/",playerCatchStatistics[ player ]," = ", float( loseNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "catch 0 times."
       
       playerYellWinStatistics = dictSubstract( self.playerWinStatistics, self.playerCatchWinStatistics )
       playerYellLoseStatistics = dictSubstract( self.playerLoseStatistics, self.playerCatchLoseStatistics )
