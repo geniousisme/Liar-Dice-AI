@@ -42,7 +42,7 @@ class LiarDiceGame:
     self.playerBToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.isQuite                 = False
-    self.updateAgentList         = 'all'
+    self.updateAgent             = 'all'
 
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
@@ -174,8 +174,8 @@ class LiarDiceGame:
     CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
     while True:
       A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
-      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, [0.2, 0.2, 0.2] )
-      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, [0.2, 0.2, 0.2] )
+      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, {1:0.2, 2:0.2, 3:0.2} )
+      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, {1:0.2, 2:0.2, 3:0.2} )
       playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
       if not self.isTraining( trainingNumber ):
         print "########## Order of player", playerOrder #"Agent:", playerOrderToAgentDict[ playerOrder ]
