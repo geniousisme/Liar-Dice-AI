@@ -1,6 +1,7 @@
 #encoding:utf-8
 # -*- coding: utf-8 -*- 
-
+Tang  = 1
+Chuan = 2
 def agentParamsOf(agentName):
   riskRate = catchThreshold = yellOneProb = 0.0
   if agentName == 'A':
@@ -18,3 +19,9 @@ def agentParamsOf(agentName):
 
   return  [ riskRate, catchThreshold, yellOneProb ]
 
+def learningRate(choice):
+  if choice == Tang:
+    learningRate = 0.8
+  if choice == Chuan:
+    learningRate = 0.01
+  return learningRate

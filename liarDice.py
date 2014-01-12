@@ -38,8 +38,12 @@ class LiarDiceGame:
     self.playerCatchWinStatistics      = {}
     self.playerCatchLoseStatistics     = {}
     self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
+    self.playerAToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
+    self.playerBToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
+    self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.isQuite                 = False
     self.updateAgentList         = 'all'
+
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
     return (yellTuple, oneAppear)
@@ -170,8 +174,8 @@ class LiarDiceGame:
     CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
     while True:
       A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
-      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, self.playerToCredibilityDict )
-      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, self.playerToCredibilityDict )
+      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, [0.2, 0.2, 0.2] )
+      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, [0.2, 0.2, 0.2] )
       playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
       if not self.isTraining( trainingNumber ):
         print "########## Order of player", playerOrder #"Agent:", playerOrderToAgentDict[ playerOrder ]
@@ -209,7 +213,7 @@ class LiarDiceGame:
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
         if isLearning:
           # learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
-          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.01 )
+          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), params.learningRate( UpdateStatusTT ) ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), params.learningRate( UpdateStatusOO ) )
           # if self.learningSwitch == UpdateStatusTT:
           #   learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           # elif self.learningSwitch == UpdateStatusOO:
