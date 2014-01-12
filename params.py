@@ -9,11 +9,11 @@ def agentParamsOf(agentName):
     yellOneProb    = 0.0  #0:不會喊一
   if agentName == 'B':
     riskRate       = 0.1
-    catchThreshold = 0.0
+    catchThreshold = 0.1
     yellOneProb    = 0.0
   if agentName == 'C':
     riskRate       = 0.1
-    catchThreshold = 0.0
+    catchThreshold = 0.1
     yellOneProb    = 0.0
 
   return  [ riskRate, catchThreshold, yellOneProb ]

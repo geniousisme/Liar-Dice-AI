@@ -204,7 +204,7 @@ class LiarDiceGame:
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
         if isLearning:
           # learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
-          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.01 )
           # if self.learningSwitch == UpdateStatusTT:
           #   learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           # elif self.learningSwitch == UpdateStatusOO:
@@ -265,11 +265,17 @@ class LiarDiceGame:
       playerYellStatistics = dictAdd( playerYellWinStatistics, playerYellLoseStatistics )
       print "playerYellWinStatistics:", playerYellWinStatistics
       for player, winNumber in playerYellWinStatistics.items():
-        print "player:", player,",",winNumber,"/",playerYellStatistics[ player ]," = ", float( winNumber )/ playerYellStatistics[ player ] * 100,"%"
+        if playerYellStatistics.has_key( player ) and playerYellStatistics[ player ] != 0:
+          print "player:", player,",",winNumber,"/",playerYellStatistics[ player ]," = ", float( winNumber )/ playerYellStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "yell 0 times."
       
       print "playerYellLoseStatistics:", playerYellLoseStatistics
       for player, loseNumber in playerYellLoseStatistics.items():
-        print "player:", player,",",loseNumber,"/",playerYellStatistics[ player ]," = ", float( loseNumber )/ playerYellStatistics[ player ] * 100,"%"
+        if playerYellStatistics.has_key( player ) and playerYellStatistics[ player ] != 0:
+          print "player:", player,",",loseNumber,"/",playerYellStatistics[ player ]," = ", float( loseNumber )/ playerYellStatistics[ player ] * 100,"%"
+        else:
+           print "player:", player, "yell 0 times."    
 
 if __name__ == '__main__':
   LiarDiceGame().run()
