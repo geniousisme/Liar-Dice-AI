@@ -12,8 +12,8 @@ import time
 notOne = False
 isOne  = True
 firstPlayerOrder = 1
-UpdateStatusTang = 1
-UpdateStatusChuan = 2
+UpdateStatusTT = 1
+UpdateStatusOO = 2
 defaultDict = {1:0, 2:0, 3:0}
 
 def dictSubstract(dict1, dict2):
@@ -203,9 +203,11 @@ class LiarDiceGame:
           print "prevYell", prevYell
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
         if isLearning:
-          # if self.learningSwitch == UpdateStatusTang:
+          # learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          # if self.learningSwitch == UpdateStatusTT:
           #   learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
-          # elif self.learningSwitch == UpdateStatusChuan:
+          # elif self.learningSwitch == UpdateStatusOO:
           #   learning = UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           newCredibilityList = learning.calcDistanceFromHistoryList()
           self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
@@ -245,7 +247,7 @@ class LiarDiceGame:
       print "playerCatchWinStatistics:", self.playerCatchWinStatistics
       for player, winNumber in self.playerCatchWinStatistics.items():
         print "player:", player,",",winNumber,"/",trainingNumber," = ", float( winNumber )/ trainingNumber * 100,"%"
-        if playerCatchStatistics[ player ] != 0:
+        if playerCatchStatistics.has_key( player ) and playerCatchStatistics[ player ] != 0 :
           print "player:", player,",",winNumber,"/", playerCatchStatistics[ player ]," = ", float( winNumber )/ playerCatchStatistics[ player ] * 100,"%"
         else:
           print "player:", player, "catch 0 times."
@@ -253,7 +255,7 @@ class LiarDiceGame:
       print "playerCatchLoseStatistics:", self.playerCatchLoseStatistics
       for player, loseNumber in self.playerCatchLoseStatistics.items():
         print "player:", player,",",loseNumber,"/",trainingNumber," = ", float( loseNumber )/ trainingNumber * 100,"%"
-        if playerCatchStatistics[ player ] != 0:
+        if playerCatchStatistics.has_key( player ) and playerCatchStatistics[ player ] != 0:
           print "player:", player,",",loseNumber,"/",playerCatchStatistics[ player ]," = ", float( loseNumber )/ playerCatchStatistics[ player ] * 100,"%"
         else:
           print "player:", player, "catch 0 times."
