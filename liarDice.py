@@ -33,8 +33,8 @@ class LiarDiceGame:
     self.lastPlayer              = None
     self.catchPlayer             = None
     self.prevYell                = None # add func to record
-    self.playerWinStatistics     = defaultDict
-    self.playerLoseStatistics    = defaultDict
+    self.playerWinStatistics     = {}
+    self.playerLoseStatistics    = {}
     self.playerCatchWinStatistics      = {}
     self.playerCatchLoseStatistics     = {}
     self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
@@ -50,7 +50,7 @@ class LiarDiceGame:
       diceNumber     = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5  #-d: dice 
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1  #-t: training
       isLearning     = True if '-l' in argList else False
-           # = True if '-l' in argList else False
+      if isLearning: self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
       self.isQuite   = True if '-q' in argList else False
       # learningSwitch = 
     return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
@@ -203,7 +203,10 @@ class LiarDiceGame:
           print "prevYell", prevYell
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
         if isLearning:
-          learning = UpdateStatusClass( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          # if self.learningSwitch == UpdateStatusTang:
+          #   learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          # elif self.learningSwitch == UpdateStatusChuan:
+          #   learning = UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           newCredibilityList = learning.calcDistanceFromHistoryList()
           self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
           print "playerToCredibilityDict:", self.playerToCredibilityDict

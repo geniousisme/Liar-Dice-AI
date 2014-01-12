@@ -1,4 +1,4 @@
-class UpdateStatusClass():
+class UpdateStatusTang():
 
   def __init__(self, result, history_lists, credibility_list, learning_rate):
     self.result = result
