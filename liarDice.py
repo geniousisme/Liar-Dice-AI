@@ -69,12 +69,13 @@ class LiarDiceGame:
 
   # def gameResult(self):
   #   print "gameResult"
-  #   return ( self.catchPlayerWin( catchPlayer, self.isTraining( trainingNumber ) ) if self.oneAppearRule( prevYell, allRealDiceStatus ) else ( self.catchPlayerWin( catchPlayer, self.isTraining( trainingNumber ) ) if self.commonRule( prevYell, allRealDiceStatus ) else self.lastPlayerWin( lastPlayer, self.isTraining( trainingNumber ) ) )
+  #   return ( self.catchPlayer( catchPlayer, self.isTraining( trainingNumber ) ) if self.oneAppearRule( prevYell, allRealDiceStatus ) else self.lastPlayerWin( lastPlayer, self.isTraining( trainingNumber ) ) ) if self.oneAppearRule( prevYell, allRealDiceStatus ) else ( self.catchPlayer( catchPlayer, self.isTraining( trainingNumber ) ) if self.commonRule( prevYell, allRealDiceStatus ) else self.lastPlayerWin( lastPlayer, self.isTraining( trainingNumber ) ) )
   
   def gameJudge(self, prevYell, allRealDiceStatus, oneAppear, catchPlayer, lastPlayer, trainingNumber):
     if not self.isTraining( trainingNumber ):
       print "oneAppear?", oneAppear
       print "allRealDiceStatus", allRealDiceStatus
+      winPlayer, losePlayer = self.gameResult()
     if not oneAppear:
       if self.oneAppearRule( prevYell, allRealDiceStatus ):
         winPlayer = self.catchPlayerWin( catchPlayer, self.isTraining( trainingNumber ) )
