@@ -37,7 +37,7 @@ class LiarDiceGame:
     self.playerLoseStatistics    = {}
     self.playerCatchWinStatistics      = {}
     self.playerCatchLoseStatistics     = {}
-    self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
+    self.playerToCredibilityDict  = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
     self.playerAToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.playerBToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
@@ -105,11 +105,23 @@ class LiarDiceGame:
       self.playerCatchLoseStatistics[ catchLosePlayer ] = 1
 
   def catchPlayerWin(self, catchPlayer, lastPlayer, isTraining):
-    if not isTraining:  print "Successfully Catch!! Player", catchPlayer, "win this game!!"
+    if not isTraining:  
+      print
+      print "Successfully Catch!! Player", catchPlayer, "win this game!!"
+      print "############"
+      print "# Winer:", catchPlayer, "#"
+      print "# Loser:", lastPlayer, "#"
+      print "############"
     return [ catchPlayer, lastPlayer ]
 
   def lastPlayerWin(self, lastPlayer, catchPlayer, isTraining):
-    if not isTraining:  print "Oops!! Lousy Catch!! Player", lastPlayer,  "win this game!!"
+    if not isTraining:  
+      print
+      print "Oops!! Lousy Catch!! Player", lastPlayer,  "win this game!!"
+      print "############"
+      print "# Winer:", lastPlayer, "#"
+      print "# Loser:", catchPlayer, "#"
+      print "############"
     return [ lastPlayer, catchPlayer ]
 
   def isTraining(self, trainingNumber):
@@ -174,8 +186,8 @@ class LiarDiceGame:
     CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
     while True:
       A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
-      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, {1:0.2, 2:0.2, 3:0.2} )
-      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, {1:0.2, 2:0.2, 3:0.2} )
+      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, {1:0.1, 2:0.1, 3:0.1} )
+      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, {1:0.1, 2:0.1, 3:0.1} )
       playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
       if not self.isTraining( trainingNumber ):
         print "########## Order of player", playerOrder #"Agent:", playerOrderToAgentDict[ playerOrder ]
@@ -205,7 +217,11 @@ class LiarDiceGame:
       if Catch:
         self.recordCatchNLastPlayer( playerOrder, playerNumber )
         if not self.isTraining( trainingNumber ):
-          print "Game Over, start showing result"
+          print
+          print "###################################"
+          print "# Game Over, start showing result #"
+          print "###################################"
+          print
           print "catchPlayer:", self.catchPlayer
           print "lastPlayer:", self.lastPlayer
           print "playerYellHistory:", self.playerYellHistory
