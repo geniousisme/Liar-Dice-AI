@@ -287,7 +287,16 @@ class LiarDiceGame:
         if playerYellStatistics.has_key( player ) and playerYellStatistics[ player ] != 0:
           print "player:", player,",",loseNumber,"/",playerYellStatistics[ player ]," = ", float( loseNumber )/ playerYellStatistics[ player ] * 100,"%"
         else:
-           print "player:", player, "yell 0 times."    
+           print "player:", player, "yell 0 times."
+
+      if self.updateAgent == 'all':
+        print "self.playerToCredibilityDict:", self.playerToCredibilityDict 
+      elif self.updateAgent == 'A':
+        print "agentA:", self.playerToCredibilityDict[1] 
+      elif self.updateAgent == 'B':
+        print "agentB:", self.playerToCredibilityDict[2]
+      elif self.updateAgent == 'C':
+        print "agentC:", self.playerToCredibilityDict[3]
 
 if __name__ == '__main__':
   LiarDiceGame().run()
