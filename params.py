@@ -13,7 +13,7 @@ def agentParamsOf(agentName):
     catchThreshold = 0.1
     yellOneProb    = 0.0
   if agentName == 'C':
-    riskRate       = 0.0
+    riskRate       = 0.01
     catchThreshold = 0.1
     yellOneProb    = 0.0
 

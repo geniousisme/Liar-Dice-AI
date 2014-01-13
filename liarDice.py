@@ -43,6 +43,10 @@ class LiarDiceGame:
     self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.isQuite                 = False
     self.updateAgent             = 'all'
+    self.agentB = None
+    self.BRiskRate = 0.1
+    self.CRiskRate = 0.1
+    self.agentC = None
 
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
@@ -56,6 +60,14 @@ class LiarDiceGame:
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1  #-t: training
       isLearning     = True if '-l' in argList else False
       
+      self.agentB = 'B' if '-agentB' in argList else None
+      if self.agentB is not None:
+        self.BRiskRate = float( argList[ argList.index('-agentB') + 1 ] )
+      
+      self.agentC = 'C' if '-agentC' in argList else None
+      if self.agentC is not None:
+        self.CRiskRate = float( argList[ argList.index('-agentC') + 1 ] )
+
       if isLearning: 
         self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
         self.updateAgent = argList[ argList.index('-a') + 1 ] if '-a' in argList else 'all'
@@ -184,6 +196,8 @@ class LiarDiceGame:
     ARiskRate, ACatchThreshold, AYellOneProb = params.agentParamsOf('A')
     BRiskRate, BCatchThreshold, BYellOneProb = params.agentParamsOf('B')
     CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
+    if self.agentB is not None: BRiskRate = self.BRiskRate 
+    if self.agentC is not None: CRiskRate = self.CRiskRate
     while True:
       A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
       B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, {1:0.1, 2:0.1, 3:0.1} )
@@ -310,6 +324,7 @@ class LiarDiceGame:
            print "player:", player, "yell 0 times."
 
       if self.updateAgent == 'all':
+        self.playerToCredibilityDict.pop(1)
         print "self.playerToCredibilityDict:", self.playerToCredibilityDict 
       elif self.updateAgent == 'A':
         print "agentA:", self.playerToCredibilityDict[1] 
