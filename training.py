@@ -1,4 +1,4 @@
-class UpdateStatusClass():
+class UpdateStatusTang():
 
   def __init__(self, result, history_lists, credibility_list, learning_rate):
     self.result = result
@@ -119,7 +119,8 @@ class UpdateStatusChuan():
 
     # print total_distances
     for index in range(len(self.credibility_list)):
-      
+      if total_distances[ index ] < 0.5:
+        total_distances[ index ] = -1.0
       new_value = self.credibility_list[index] - (total_distances[index]* self.learning_rate)
       
       if new_value > min_credibility and new_value < 1:

@@ -12,6 +12,9 @@ import time
 notOne = False
 isOne  = True
 firstPlayerOrder = 1
+UpdateStatusTT = 1
+UpdateStatusOO = 2
+defaultDict = {1:0, 2:0, 3:0}
 
 def dictSubstract(dict1, dict2):
   return { key: dict1[key] - dict2.get(key, 0) for key in dict1.keys() }
@@ -34,8 +37,17 @@ class LiarDiceGame:
     self.playerLoseStatistics    = {}
     self.playerCatchWinStatistics      = {}
     self.playerCatchLoseStatistics     = {}
-    self.playerToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
+    self.playerToCredibilityDict  = { 1:0.1, 2:0.1, 3:0.1 } #1:0 代表其他agent完全不相信
+    self.playerAToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
+    self.playerBToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
+    self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.isQuite                 = False
+    self.updateAgent             = 'all'
+    self.agentB = None
+    self.BRiskRate = 0.1
+    self.CRiskRate = 0.1
+    self.agentC = None
+
     
   def buildYellNOneTuple(self, yellTuple, oneAppear):
     return (yellTuple, oneAppear)
@@ -47,8 +59,21 @@ class LiarDiceGame:
       diceNumber     = int( argList[ argList.index('-d') + 1 ] ) if '-d' in argList else 5  #-d: dice 
       trainingNumber = int( argList[ argList.index('-t') + 1 ] ) if '-t' in argList else 1  #-t: training
       isLearning     = True if '-l' in argList else False
+      
+      self.agentB = 'B' if '-agentB' in argList else None
+      if self.agentB is not None:
+        self.BRiskRate = float( argList[ argList.index('-agentB') + 1 ] )
+      
+      self.agentC = 'C' if '-agentC' in argList else None
+      if self.agentC is not None:
+        self.CRiskRate = float( argList[ argList.index('-agentC') + 1 ] )
+
+      if isLearning: 
+        self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
+        self.updateAgent = argList[ argList.index('-a') + 1 ] if '-a' in argList else 'all'
+
       self.isQuite   = True if '-q' in argList else False
-      # learningSwitch = 
+      
     return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
   
   def recordPlayerYell(self, playerOrder, yellNOneTuple):
@@ -91,14 +116,24 @@ class LiarDiceGame:
     else:
       self.playerCatchLoseStatistics[ catchLosePlayer ] = 1
 
-
-
   def catchPlayerWin(self, catchPlayer, lastPlayer, isTraining):
-    if not isTraining:  print "Successfully Catch!! Player", catchPlayer, "win this game!!"
+    if not isTraining:  
+      print
+      print "Successfully Catch!! Player", catchPlayer, "win this game!!"
+      print "############"
+      print "# Winer:", catchPlayer, "#"
+      print "# Loser:", lastPlayer, "#"
+      print "############"
     return [ catchPlayer, lastPlayer ]
 
   def lastPlayerWin(self, lastPlayer, catchPlayer, isTraining):
-    if not isTraining:  print "Oops!! Lousy Catch!! Player", lastPlayer,  "win this game!!"
+    if not isTraining:  
+      print
+      print "Oops!! Lousy Catch!! Player", lastPlayer,  "win this game!!"
+      print "############"
+      print "# Winer:", lastPlayer, "#"
+      print "# Loser:", catchPlayer, "#"
+      print "############"
     return [ lastPlayer, catchPlayer ]
 
   def isTraining(self, trainingNumber):
@@ -161,10 +196,12 @@ class LiarDiceGame:
     ARiskRate, ACatchThreshold, AYellOneProb = params.agentParamsOf('A')
     BRiskRate, BCatchThreshold, BYellOneProb = params.agentParamsOf('B')
     CRiskRate, CCatchThreshold, CYellOneProb = params.agentParamsOf('C')
+    if self.agentB is not None: BRiskRate = self.BRiskRate 
+    if self.agentC is not None: CRiskRate = self.CRiskRate
     while True:
       A_Agent = ProbAgent( playerToDiceStatusDict[ 1 ], hostile_player_num, dice_amount_per_player, ARiskRate, ACatchThreshold, AYellOneProb, self.playerToCredibilityDict )
-      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, self.playerToCredibilityDict )
-      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, self.playerToCredibilityDict )
+      B_Agent = ProbAgent( playerToDiceStatusDict[ 2 ], hostile_player_num, dice_amount_per_player, BRiskRate, BCatchThreshold, BYellOneProb, {1:0.1, 2:0.1, 3:0.1} )
+      C_Agent = ProbAgent( playerToDiceStatusDict[ 3 ], hostile_player_num, dice_amount_per_player, CRiskRate, CCatchThreshold, CYellOneProb, {1:0.1, 2:0.1, 3:0.1} )
       playerOrderToAgentDict = {1: A_Agent, 2: B_Agent, 3: C_Agent}
       if not self.isTraining( trainingNumber ):
         print "########## Order of player", playerOrder #"Agent:", playerOrderToAgentDict[ playerOrder ]
@@ -194,17 +231,33 @@ class LiarDiceGame:
       if Catch:
         self.recordCatchNLastPlayer( playerOrder, playerNumber )
         if not self.isTraining( trainingNumber ):
-          print "Game Over, start showing result"
+          print
+          print "###################################"
+          print "# Game Over, start showing result #"
+          print "###################################"
+          print
           print "catchPlayer:", self.catchPlayer
           print "lastPlayer:", self.lastPlayer
           print "playerYellHistory:", self.playerYellHistory
           print "prevYell", prevYell
         self.gameJudge( prevYell, allRealDiceStatus, oneAppear, self.catchPlayer, self.lastPlayer, trainingNumber )
         if isLearning:
-          learning = UpdateStatusClass( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          # learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), params.learningRate( UpdateStatusTT ) ) if self.learningSwitch == UpdateStatusTT else UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), params.learningRate( UpdateStatusOO ) )
+          # if self.learningSwitch == UpdateStatusTT:
+          #   learning = UpdateStatusTang( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
+          # elif self.learningSwitch == UpdateStatusOO:
+          #   learning = UpdateStatusChuan( allRealDiceStatus, self.playerYellHistory, self.playerToCredibilityDict.values(), 0.8 )
           newCredibilityList = learning.calcDistanceFromHistoryList()
-          self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
-          print "playerToCredibilityDict:", self.playerToCredibilityDict
+          if self.updateAgent == 'all':
+            self.playerToCredibilityDict = dict( enumerate( newCredibilityList, start = 1 ) )
+          elif self.updateAgent == 'A':
+            self.playerToCredibilityDict[1] = newCredibilityList[0]
+          elif self.updateAgent == 'B':
+            self.playerToCredibilityDict[2] = newCredibilityList[1]
+          elif self.updateAgent == 'C':
+            self.playerToCredibilityDict[3] = newCredibilityList[2]
+          if not self.isQuite:  print "playerToCredibilityDict:", self.playerToCredibilityDict
         break
       else:
         if playerOrder < playerNumber:
@@ -213,7 +266,7 @@ class LiarDiceGame:
           playerOrder = firstPlayerOrder
       roundNumber += 1
 
-  def showStatisticsResult(self, playerStatistics, playerStatisticsType):
+  def showStatisticsResult(self, playerStatistics, denominator, playerStatisticsType):
     print playerStatisticsType, playerStatistics   
 
   def run(self):  
@@ -240,23 +293,45 @@ class LiarDiceGame:
       print "playerCatchWinStatistics:", self.playerCatchWinStatistics
       for player, winNumber in self.playerCatchWinStatistics.items():
         print "player:", player,",",winNumber,"/",trainingNumber," = ", float( winNumber )/ trainingNumber * 100,"%"
-        print "player:", player,",",winNumber,"/", playerCatchStatistics[ player ]," = ", float( winNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        if playerCatchStatistics.has_key( player ) and playerCatchStatistics[ player ] != 0 :
+          print "player:", player,",",winNumber,"/", playerCatchStatistics[ player ]," = ", float( winNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "catch 0 times."
 
       print "playerCatchLoseStatistics:", self.playerCatchLoseStatistics
       for player, loseNumber in self.playerCatchLoseStatistics.items():
         print "player:", player,",",loseNumber,"/",trainingNumber," = ", float( loseNumber )/ trainingNumber * 100,"%"
-        print "player:", player,",",loseNumber,"/",playerCatchStatistics[ player ]," = ", float( loseNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        if playerCatchStatistics.has_key( player ) and playerCatchStatistics[ player ] != 0:
+          print "player:", player,",",loseNumber,"/",playerCatchStatistics[ player ]," = ", float( loseNumber )/ playerCatchStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "catch 0 times."
       
       playerYellWinStatistics = dictSubstract( self.playerWinStatistics, self.playerCatchWinStatistics )
       playerYellLoseStatistics = dictSubstract( self.playerLoseStatistics, self.playerCatchLoseStatistics )
       playerYellStatistics = dictAdd( playerYellWinStatistics, playerYellLoseStatistics )
       print "playerYellWinStatistics:", playerYellWinStatistics
       for player, winNumber in playerYellWinStatistics.items():
-        print "player:", player,",",winNumber,"/",playerYellStatistics[ player ]," = ", float( winNumber )/ playerYellStatistics[ player ] * 100,"%"
+        if playerYellStatistics.has_key( player ) and playerYellStatistics[ player ] != 0:
+          print "player:", player,",",winNumber,"/",playerYellStatistics[ player ]," = ", float( winNumber )/ playerYellStatistics[ player ] * 100,"%"
+        else:
+          print "player:", player, "yell 0 times."
       
       print "playerYellLoseStatistics:", playerYellLoseStatistics
       for player, loseNumber in playerYellLoseStatistics.items():
-        print "player:", player,",",loseNumber,"/",playerYellStatistics[ player ]," = ", float( loseNumber )/ playerYellStatistics[ player ] * 100,"%"
+        if playerYellStatistics.has_key( player ) and playerYellStatistics[ player ] != 0:
+          print "player:", player,",",loseNumber,"/",playerYellStatistics[ player ]," = ", float( loseNumber )/ playerYellStatistics[ player ] * 100,"%"
+        else:
+           print "player:", player, "yell 0 times."
+
+      if self.updateAgent == 'all':
+        self.playerToCredibilityDict.pop(1)
+        print "self.playerToCredibilityDict:", self.playerToCredibilityDict 
+      elif self.updateAgent == 'A':
+        print "agentA:", self.playerToCredibilityDict[1] 
+      elif self.updateAgent == 'B':
+        print "agentB:", self.playerToCredibilityDict[2]
+      elif self.updateAgent == 'C':
+        print "agentC:", self.playerToCredibilityDict[3]
 
 if __name__ == '__main__':
   LiarDiceGame().run()
