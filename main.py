@@ -32,7 +32,7 @@ class LiarDiceGame:
         else:
           playerTurnCount = 1
 
-gdef readCommand():
+def readCommand():
   # Sprint "arg:", sys.argv
   argList = sys.argv
   if len( argList ) >= 1:
