@@ -1,4 +1,0 @@
-1. 參數太多了，有些可以改成self.XXXX，像是trainingNumber, diceNumber
-2. 最後game judge那邊請改成三元運算子寫法
-3. 把一些很重複的code收一收(recordStatistic, bottom show result那邊)
-4. 幹！！底下太醜了啦！給我他媽的生成function

@@ -41,7 +41,7 @@ class LiarDiceGame:
     self.playerAToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.playerBToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
     self.playerCToCredibilityDict = { 1:0.1, 2:0.1, 3:0.1 } 
-    self.isQuite                 = False
+    self.isQuiet                 = False
     self.updateAgent             = 'all'
     self.agentB = None
     self.BRiskRate = 0.1
@@ -72,7 +72,7 @@ class LiarDiceGame:
         self.learningSwitch = int( argList[ argList.index('-l') + 1 ] )
         self.updateAgent = argList[ argList.index('-a') + 1 ] if '-a' in argList else 'all'
 
-      self.isQuite   = True if '-q' in argList else False
+      self.isQuiet   = True if '-q' in argList else False
       
     return [ playerNumber, diceNumber, trainingNumber, isLearning ] 
   
@@ -87,34 +87,10 @@ class LiarDiceGame:
     self.catchPlayer = playerOrder
 
   def recordStatistics(self, playerType, statisticsTypeDict):
-    if self.statisticsTypeDict.has_key( playerType ):
-      self.statisticsTypeDict[ playerType ] += 1
+    if statisticsTypeDict.has_key( playerType ):
+      statisticsTypeDict[ playerType ] += 1
     else:
-      self.statisticsTypeDict[ playerType ] = 1
-
-  def recordWinStatics(self, winPlayer):
-    if self.playerWinStatistics.has_key( winPlayer ):
-      self.playerWinStatistics[ winPlayer ] += 1
-    else:
-      self.playerWinStatistics[ winPlayer ] = 1
-
-  def recordLoseStatics(self, losePlayer):
-    if self.playerLoseStatistics.has_key( losePlayer ):
-      self.playerLoseStatistics[ losePlayer ] += 1
-    else:
-      self.playerLoseStatistics[ losePlayer ] = 1
-
-  def recordCatchWinStatistics(self, catchWinPlayer):
-    if self.playerCatchWinStatistics.has_key( catchWinPlayer ):
-      self.playerCatchWinStatistics[ catchWinPlayer ] += 1
-    else:
-      self.playerCatchWinStatistics[ catchWinPlayer ] = 1
-
-  def recordCatchLoseStatistics(self, catchLosePlayer):
-    if self.playerCatchLoseStatistics.has_key( catchLosePlayer ):
-      self.playerCatchLoseStatistics[ catchLosePlayer ] += 1
-    else:
-      self.playerCatchLoseStatistics[ catchLosePlayer ] = 1
+      statisticsTypeDict[ playerType ] = 1
 
   def catchPlayerWin(self, catchPlayer, lastPlayer, isTraining):
     if not isTraining:  
@@ -164,22 +140,28 @@ class LiarDiceGame:
     if not oneAppear:
       if self.oneAppearRule( prevYell, allRealDiceStatus ):
         winPlayer, losePlayer = self.catchPlayerWin( catchPlayer, lastPlayer, self.isTraining( trainingNumber ) )
-        self.recordCatchWinStatistics( winPlayer )
+        self.recordStatistics( winPlayer, self.playerCatchWinStatistics )
+        # self.recordCatchWinStatistics( winPlayer )
       else:
         winPlayer, losePlayer = self.lastPlayerWin( lastPlayer, catchPlayer, self.isTraining( trainingNumber ) )
-        self.recordCatchLoseStatistics( losePlayer )
+        self.recordStatistics( losePlayer, self.playerCatchLoseStatistics )
+        # self.recordCatchLoseStatistics( losePlayer )
     else:
       if self.commonRule( prevYell, allRealDiceStatus ):
         winPlayer, losePlayer = self.catchPlayerWin( catchPlayer, lastPlayer, self.isTraining( trainingNumber ) )
-        self.recordCatchWinStatistics( winPlayer )
+        self.recordStatistics( winPlayer, self.playerCatchWinStatistics )
+        # self.recordCatchWinStatistics( winPlayer )
       else:
         winPlayer, losePlayer = self.lastPlayerWin( lastPlayer, catchPlayer, self.isTraining( trainingNumber ) )
-        self.recordCatchLoseStatistics( losePlayer )
+        self.recordStatistics( losePlayer, self.playerCatchLoseStatistics )
+        # self.recordCatchLoseStatistics( losePlayer )
 
     if self.isTraining( trainingNumber ): 
-      if not self.isQuite:  print "Winer:", winPlayer,"Loser:", losePlayer
-      self.recordWinStatics(  winPlayer  )
-      self.recordLoseStatics( losePlayer )
+      if not self.isQuiet:  print "Winer:", winPlayer,"Loser:", losePlayer
+      self.recordStatistics( winPlayer, self.playerWinStatistics )
+      # self.recordWinStatics(  winPlayer  )
+      self.recordStatistics( losePlayer, self.playerLoseStatistics )
+      # self.recordLoseStatics( losePlayer )
      
 
   def gameLoop(self, playerNumber, diceNumber, trainingNumber, isLearning, playerToDiceStatusDict, allRealDiceStatus):
@@ -257,7 +239,7 @@ class LiarDiceGame:
             self.playerToCredibilityDict[2] = newCredibilityList[1]
           elif self.updateAgent == 'C':
             self.playerToCredibilityDict[3] = newCredibilityList[2]
-          if not self.isQuite:  print "playerToCredibilityDict:", self.playerToCredibilityDict
+          if not self.isQuiet:  print "playerToCredibilityDict:", self.playerToCredibilityDict
         break
       else:
         if playerOrder < playerNumber:
@@ -275,7 +257,7 @@ class LiarDiceGame:
       if not self.isTraining( trainingNumber ):  
         print "playerNumber:", playerNumber, "diceNumber:", diceNumber
       else:
-        if not self.isQuite:  print "training:", training
+        if not self.isQuiet:  print "training:", training
       self.playerToDiceStatusDict = dice.generate( self.playerToDiceStatusDict, playerNumber, diceNumber )
       self.allRealDiceStatus      = dice.allReallDiceStatusCount( self.playerToDiceStatusDict.values() )
       if not self.isTraining( trainingNumber ):  print "all dice status:", self.allRealDiceStatus
